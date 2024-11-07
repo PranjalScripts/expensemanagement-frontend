@@ -12,9 +12,12 @@ import {
   FaIdCard,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import "./Sidebar.css";
+import { useAuth } from "../../context/AuthContext"; // Import context
 
-const Sidebar = ({ username, isLoggedIn, onLogout }) => {
+import "./Sidebar.css"; // Assuming you have styles for Sidebar
+
+const Sidebar = () => {
+  const { isLoggedIn, username, logout } = useAuth(); // Use context for state
   const [isOpen, setIsOpen] = useState(true);
   const navigate = useNavigate();
 
@@ -55,12 +58,24 @@ const Sidebar = ({ username, isLoggedIn, onLogout }) => {
           <Nav.Link href="/users" className="sidebar-link">
             <FaUsers className="icon" /> {isOpen && "Users"}
           </Nav.Link>
-          <Nav.Link href="/profile" className="sidebar-link">
-            <FaIdCard className="icon" /> {isOpen && "Your Profile"}
-          </Nav.Link>
+          {isLoggedIn && (
+            <Nav.Link href="/profile" className="sidebar-link">
+              <FaIdCard className="icon" /> {isOpen && "Your Profile"}
+            </Nav.Link>
+          )}
         </Nav>
 
-         
+        <Nav className="mt-auto">
+          {isLoggedIn ? (
+            <Button variant="outline-light" onClick={logout}>
+              <FaSignOutAlt className="icon" /> {isOpen && "Logout"}
+            </Button>
+          ) : (
+            <Button variant="outline-light" onClick={handleLoginClick}>
+              <FaSignInAlt className="icon" /> {isOpen && "Login"}
+            </Button>
+          )}
+        </Nav>
       </Navbar>
     </div>
   );

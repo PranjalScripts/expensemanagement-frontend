@@ -1,148 +1,112 @@
 import React, { useState, useEffect } from "react";
-import { toast, ToastContainer } from "react-toastify"; // Import ToastContainer
-import "react-toastify/dist/ReactToastify.css"; // Import Toastify styles
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import Sidebar from "../../../pages/Layout/sidebar"; // Assuming Sidebar is correct path
+import Sidebar from "../../../pages/Layout/sidebar";
+import axios from "axios";
+import { toast } from "react-toastify";
 
 const ProfileUpdate = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [userId, setUserId] = useState(null);
   const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+  });
 
-useEffect(() => {
-  const checkAuthentication = () => {
-    const token = localStorage.getItem("token"); // Retrieve token from localStorage
+  useEffect(() => {
+    const token = localStorage.getItem("token");
     if (!token) {
-      toast.warn("Please log in to access the profile page.");
-      navigate("/login"); // Redirect to login page if not logged in
-      return;
+      toast.warn("Please log in to access your profile");
+      navigate("/login"); // Redirect to login if not authenticated
     }
+  }, [navigate]);
 
-    const userIdFromStorage = localStorage.getItem("userId"); // Retrieve user ID if token exists
-    if (userIdFromStorage) {
-      setUserId(userIdFromStorage);
-    }
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
-  checkAuthentication();
-
-  // Set up an event listener to watch for changes in localStorage
-  window.addEventListener("storage", checkAuthentication);
-
-  // Clean up the event listener when component unmounts
-  return () => {
-    window.removeEventListener("storage", checkAuthentication);
-  };
-}, [navigate]);
-
-//
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!userId) {
-      toast.error("User is not authenticated.");
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    const updatedData = {
-      name,
-      email,
-      phone,
-      password,
-    };
-
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.put(
+      const userId = localStorage.getItem("userId");
+      const token = localStorage.getItem("token"); // Retrieve the token from local storage
+      await axios.put(
         `http://localhost:5100/api/v1/auth/update-profile/${userId}`,
-        updatedData,
+        formData,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token}`, // Add the token to the Authorization header
           },
         }
       );
-
       toast.success("Profile updated successfully");
-      navigate("/dashboard"); // Redirect to dashboard after successful update
     } catch (error) {
-      toast.error(error.response?.data?.message || "Error updating profile");
-        console.error(error.response?.data);
-        console.log("your error is here", error);
-    } finally {
-      setIsSubmitting(false);
+      toast.error(error.response?.data?.message || "Failed to update profile");
     }
   };
 
   return (
     <div className="d-flex">
-      {/* Sidebar is added here */}
       <Sidebar />
-      <div className="container mt-5">
+      <div className="container mt-4">
         <h1>Update Profile</h1>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="mt-3">
           <div className="mb-3">
             <label className="form-label">Name</label>
             <input
               type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
               className="form-control"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
               placeholder="Enter your name"
+              required
             />
           </div>
           <div className="mb-3">
             <label className="form-label">Email</label>
             <input
               type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
               className="form-control"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
               placeholder="Enter your email"
+              required
             />
           </div>
           <div className="mb-3">
             <label className="form-label">Phone</label>
             <input
-              type="text"
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
               className="form-control"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              required
               placeholder="Enter your phone number"
+              required
             />
           </div>
           <div className="mb-3">
             <label className="form-label">Password</label>
             <input
               type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
               className="form-control"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password (leave empty if not changing)"
+              placeholder="Enter a new password"
+              required
             />
           </div>
-          <button
-            type="submit"
-            className="btn btn-primary"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Updating..." : "Update Profile"}
+          <button type="submit" className="btn btn-primary w-100">
+            Update Profile
           </button>
         </form>
       </div>
-
-      {/* ToastContainer to display the toast notifications */}
-      <ToastContainer />
     </div>
   );
 };

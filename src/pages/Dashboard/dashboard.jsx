@@ -22,35 +22,10 @@ const Dashboard = () => {
     <div className="d-flex">
       <Sidebar />
 
-      <div className="p-4 flex-grow-1">
-        <div className="d-flex justify-content-end">
-          {userDetails ? (
-            <div>
-              <span className="me-3">Welcome, {userDetails.user.name}!</span>
-              <button onClick={handleLogout} className="btn btn-danger">
-                Logout
-              </button>
-            </div>
-          ) : (
-            <button
-              className="btn btn-primary"
-              onClick={() => (window.location.href = "/login")}
-            >
-              Login
-            </button>
-          )}
-        </div>
+       <h2>This is dashboard page</h2>
 
      
-        {userDetails && (
-          <div>
-            <p>Email: {userDetails.user.email}</p>
-            <p>Username: {userDetails.user.name}</p>
-            {/* Add more user details if needed */}
-          </div>
-        )}
-      </div>
-    </div>
+         </div>
   );
 };
 
